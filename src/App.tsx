@@ -25,7 +25,8 @@ export default function App() {
   const onSubmit = () => {
     try {
       const redditUrl = getUrlSchema(urlInput);
-      setSchemaList((x) => [...x, redditUrl]);
+      console.log(redditUrl);
+      setSchemaList((x) => [redditUrl, ...x]);
       setError("");
       setUrlInput("");
     } catch (e) {
@@ -36,6 +37,9 @@ export default function App() {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrlInput(e.currentTarget.value);
     setError("");
+  };
+  const onDelete = (schema: IUrlSchema) => {
+    setSchemaList((x) => x.filter((y) => y.id !== schema.id));
   };
 
   return (
@@ -63,7 +67,7 @@ export default function App() {
       </Container>
       <Space h="xl" />
       <Container fluid>
-        <UrlSchemaViewList list={schemaList} />
+        <UrlSchemaViewList list={schemaList} onDelete={onDelete} />
       </Container>
 
       {/* <Sandbox /> */}

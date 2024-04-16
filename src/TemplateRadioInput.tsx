@@ -37,6 +37,7 @@ export function TemplateRadioInput(props: {
 
   return (
     <Radio
+      styles={{ body: { alignItems: "center", whiteSpace: "nowrap" } }}
       description={props.description}
       icon={CheckIcon}
       checked={check(props.initialVal)}

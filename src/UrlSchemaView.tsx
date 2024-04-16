@@ -1,8 +1,9 @@
 import * as React from "react";
 import { IUrlSchema, schemaToString } from "./urlSchema";
-import { Group, Mark, Popover, Text } from "@mantine/core";
+import { Badge, Flex, Table, Text } from "@mantine/core";
 import { CopyButton } from "./CopyButton";
 import { HostSelector } from "./HostSelector";
+import { DeleteButton } from "./DeleteButton";
 import { SelectWithMemory } from "./SelectWithMemory";
 
 function useUrlSchemaProp(
@@ -25,10 +26,11 @@ function useUrlSchemaProp(
   return { setValue, getValue };
 }
 
-export const UrlSchemaView: React.FC<{ schema: IUrlSchema; index: number }> = ({
-  schema: initialSchema,
-  index,
-}) => {
+export const UrlSchemaView: React.FC<{
+  schema: IUrlSchema;
+  index: number;
+  onDelete: () => void;
+}> = ({ schema: initialSchema, index, onDelete }) => {
   const [schema, setSchema] = React.useState(initialSchema);
   // const setProp = (prop: keyof IUrlSchema) => (val: string) =>
   //   setSchema((x) => ({ ...x, [prop]: val }));
@@ -45,79 +47,93 @@ export const UrlSchemaView: React.FC<{ schema: IUrlSchema; index: number }> = ({
     setSchema,
     "language",
     "{LANGUAGE}",
-    true
+    false
   );
 
   return (
-    <Group justify="center">
-      {index}.
-      <Text size="lg">
-        https://
-        <Popover
-          position="bottom"
-          middlewares={{ flip: true, shift: true, inline: true }}
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Mark style={{ cursor: "pointer" }} color="orange">
-              {host.getValue().raw.replace("https://", "")}
-            </Mark>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <HostSelector
-              host={host.getValue().input}
-              onChange={host.setValue}
-            />
-          </Popover.Dropdown>
-        </Popover>
-        /
-        <Popover
-          position="bottom"
-          middlewares={{ flip: true, shift: true, inline: true }}
-          withArrow
-          shadow="md"
-          width={"target"}
-        >
-          <Popover.Target>
-            <Mark style={{ cursor: "pointer" }} color="lime">
-              {postSpecificSegment.getValue().raw}
-            </Mark>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <SelectWithMemory
-              value={postSpecificSegment.getValue().input}
-              onChange={postSpecificSegment.setValue}
-              memoryKey="postSpecificSegment"
-              placeholder="{POST_SPECIFIC_SEGMENT}"
-            />
-          </Popover.Dropdown>
-        </Popover>
-        /
-        <Popover
-          position="bottom"
-          middlewares={{ flip: true, shift: true, inline: true }}
-          withArrow
-          shadow="md"
-          width={150}
-        >
-          <Popover.Target>
-            <Mark style={{ cursor: "pointer" }} color="cyan">
-              {language.getValue().raw}
-            </Mark>
-          </Popover.Target>
-          <Popover.Dropdown>
-            <SelectWithMemory
-              value={language.getValue().input}
-              onChange={language.setValue}
-              memoryKey="language"
-              placeholder="{LANGUAGE}"
-            />
-          </Popover.Dropdown>
-        </Popover>
-        /
-      </Text>
-      <CopyButton strToCopy={schemaToString(schema)} />
-    </Group>
+    <>
+      <Table
+        withTableBorder
+        withColumnBorders
+        styles={{ td: { verticalAlign: "top" } }}
+      >
+        <Table.Tbody>
+          <Table.Tr>
+            <Table.Td colSpan={3}>
+              <Flex justify="space-between" align="center">
+                <div>
+                  <Badge circle variant="light" color="blue">
+                    {index}
+                  </Badge>
+                  &nbsp; https://
+                  <Text display={"inline"} c="orange">
+                    {host.getValue().raw.replace("https://", "")}
+                  </Text>
+                  /
+                  <Text display={"inline"} c="lime">
+                    {postSpecificSegment.getValue().raw}
+                  </Text>
+                  /
+                  {language.getValue().raw && (
+                    <>
+                      <Text display={"inline"} c="cyan">
+                        {language.getValue().raw}
+                      </Text>
+                      /
+                    </>
+                  )}
+                </div>
+                <Flex gap={5}>
+                  <CopyButton strToCopy={schemaToString(schema)} />
+                  <DeleteButton onDelete={onDelete} />
+                </Flex>
+              </Flex>
+            </Table.Td>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Th w={0}>
+              <Text c="orange" size="sm" fw={700}>
+                Host
+              </Text>
+            </Table.Th>
+            <Table.Th>
+              <Text c="lime" size="sm" fw={700}>
+                Post Specific Segment
+              </Text>
+            </Table.Th>
+            <Table.Th>
+              <Text c="cyan" size="sm" fw={700}>
+                Language
+              </Text>
+            </Table.Th>
+          </Table.Tr>
+          <Table.Tr>
+            <Table.Td>
+              <HostSelector
+                host={host.getValue().input}
+                onChange={host.setValue}
+              />
+            </Table.Td>
+            <Table.Td>
+              <SelectWithMemory
+                value={postSpecificSegment.getValue().input}
+                onChange={postSpecificSegment.setValue}
+                memoryKey="postSpecificSegment"
+                placeholder="{POST_SPECIFIC_SEGMENT}"
+              />
+            </Table.Td>
+            <Table.Td w={140}>
+              <SelectWithMemory
+                defaultOptions={["en", "fr", "es"]}
+                value={language.getValue().input}
+                onChange={language.setValue}
+                memoryKey="language"
+                placeholder="{LANGUAGE}"
+              />
+            </Table.Td>
+          </Table.Tr>
+        </Table.Tbody>
+      </Table>
+    </>
   );
 };

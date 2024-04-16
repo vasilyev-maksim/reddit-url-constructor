@@ -6,7 +6,7 @@ import {
   rem,
   Button,
 } from "@mantine/core";
-import { IconMinus } from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useMemory } from "./memoryStore";
 
@@ -17,14 +17,17 @@ export function SelectWithMemory(props: {
   onChange: (val: string) => void;
   memoryKey: string;
   inline?: boolean;
+  autoFocus?: boolean;
+  defaultOptions?: string[];
+  renderItem?: (val: string) => React.ReactNode;
 }) {
-  const memoryStore = useMemory(props.memoryKey);
+  const memoryStore = useMemory(props.memoryKey, props.defaultOptions);
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
   const memorizedOptions = memoryStore.items || [];
-  const [search, setSearch] = useState(props.value);
+  const [search, setSearch] = useState(props.value || "");
 
   const exactOptionMatch = memorizedOptions.some((item) => item === search);
   const filteredOptions = memorizedOptions.filter((x) => x !== search);
@@ -52,18 +55,23 @@ export function SelectWithMemory(props: {
             whiteSpace: "nowrap",
           }}
         >
-          {item}
+          {(props.renderItem ?? ((x) => x))(item)}
         </span>
         <Button
           size="compact-xs"
           variant="light"
           color="gray"
+          styles={{
+            root: {
+              marginRight: -4,
+            },
+          }}
           onClick={(e) => {
             e.stopPropagation();
             memoryStore.deleteItem(item);
           }}
         >
-          <IconMinus style={{ width: rem(10) }} />
+          <IconTrash style={{ width: rem(10) }} />
         </Button>
       </Group>
     </Combobox.Option>
@@ -71,8 +79,8 @@ export function SelectWithMemory(props: {
 
   return (
     <Combobox
-      width={"100%"}
-      size="xs"
+      // width={"100%"}
+      size={props.inline ? "xs" : undefined}
       store={combobox}
       withinPortal={false}
       onOptionSubmit={(val) => {
@@ -89,7 +97,8 @@ export function SelectWithMemory(props: {
     >
       <Combobox.Target>
         <InputBase
-          size="xs"
+          autoFocus={props.autoFocus}
+          size={props.inline ? "xs" : undefined}
           styles={{
             root: {
               display: props.inline ? "inline-block" : "block",
@@ -115,25 +124,27 @@ export function SelectWithMemory(props: {
         />
       </Combobox.Target>
 
-      <Combobox.Dropdown>
-        <Combobox.Options>
-          {options}
-          {!exactOptionMatch && search.trim().length > 0 && (
-            <Combobox.Option
-              styles={{
-                option: {
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                },
-              }}
-              value="$create"
-            >
-              Save "{search}"
-            </Combobox.Option>
-          )}
-        </Combobox.Options>
-      </Combobox.Dropdown>
+      {options.length > 0 && (
+        <Combobox.Dropdown>
+          <Combobox.Options>
+            {options}
+            {!exactOptionMatch && search.trim().length > 0 && (
+              <Combobox.Option
+                styles={{
+                  option: {
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  },
+                }}
+                value="$create"
+              >
+                Save "{search}"
+              </Combobox.Option>
+            )}
+          </Combobox.Options>
+        </Combobox.Dropdown>
+      )}
     </Combobox>
   );
 }

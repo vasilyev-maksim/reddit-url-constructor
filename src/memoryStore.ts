@@ -6,13 +6,16 @@ export interface IMemoryStore {
   deleteItem: (val: string) => void;
 }
 
-export function useMemory(key: string): IMemoryStore {
-  let persistedMemory;
+export function useMemory(
+  key: string,
+  defaultValue: string[] = []
+): IMemoryStore {
+  let persistedMemory = defaultValue;
 
   try {
     persistedMemory = JSON.parse(localStorage.getItem(key) || "");
   } catch (error) {
-    persistedMemory = [];
+    /* empty */
   }
 
   const [items, setItems] = useState<string[]>(persistedMemory);
